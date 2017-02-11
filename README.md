@@ -33,10 +33,17 @@ You can also send messages directly with message argument.
 
 **SlackerCmd.exe config=config.json message="Hello World!"**
 
+Or without configuration file.
+
+**SlackerCmd.exe name=yourslackname channel=general token=yourslacktoken message="Hello World!"**
+
 ## List of commanline arguments
 
 **config=filename.json**
 *Load configurations from file*
+
+**configtemplate=output.json**
+*Generate configuration template file*
 
 **name=slackname**
 *Slack name [xxx.slack.com]*
@@ -70,6 +77,40 @@ You can also send messages directly with message argument.
 
 **p4password=123456789**
 *P4 password used to login.*
+
+## Config template
+Commandline argument 'configtemplate' can be used to generate config template.
+
+**SlackerCmd.exe configtemplate=output.json**
+
+Output is formatted json config file.
+
+```
+{
+  "P4": {
+    "Port": "127.0.0.1:1666",
+    "Username": "admin",
+    "Password": ""
+  },
+  "Slack": {
+    "Name": "yourslackname",
+    "Channel": "general",
+    "Token": "yourslacktoken",
+    "IllegalPaths": []
+  },
+  "FileActionLimit": 8,
+  "IllegalPaths": [],
+  "ShowPostSubmitFileChanges": true,
+  "P4DescriptionRules": [
+    {
+      "ContentRequired": true,
+      "StartWith": "[",
+      "EndstWith": "]",
+      "ContentStrings": []
+    }
+  ]
+}
+```
 
 ## External libraries
 * Json.NET
