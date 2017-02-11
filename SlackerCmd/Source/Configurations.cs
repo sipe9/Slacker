@@ -190,6 +190,8 @@ namespace SlackerCmd
             Configuration Config = new Configuration();
             string ConfigJsonFormatted = JsonConvert.SerializeObject(Config, Formatting.Indented);
             System.IO.File.WriteAllText(FilePath, ConfigJsonFormatted);
+
+            Console.Write(String.Format("[Slacker] Config template saved to {0}.", FilePath));
         }
     }
 

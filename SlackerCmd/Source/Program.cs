@@ -22,6 +22,13 @@ namespace SlackerCmd
                 return 0;
             }
 
+            var ConfigTemplate = ArgumentHelper.GetValue(Args, "configtemplate");
+            if (!String.IsNullOrEmpty(ConfigTemplate))
+            {
+                Configuration.SaveDefaultConfigFile(ConfigTemplate);
+                return 0;
+            }
+
             Console.WriteLine(String.Format("[Slacker] Running slacker command line."));
 
             var Config = new Configuration();
