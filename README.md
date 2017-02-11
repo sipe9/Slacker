@@ -1,35 +1,36 @@
 # Slacker
 
-C# commandline tool to send formatted messages to your Slack channel. Currently build around Perforce integration but can be used also to send simple messages.
+Slacker is command line tool written in C# that sends formatted messages to Slack.
 
 # How to use
-Executable parses passed commanline arguments and executes operations. Common arguments such as slack and perforce settings can be passed directly or with json configuration file.
+Slacker parses commanline arguments and executes desired operations. Arguments can be passed individially or common settings such as perforce and slack settings can be piped with json configuration file.
 
-## Peforce changelist message
-Tool has argument "p4cl" for sending formatted messages about perforce changelists. Formatted message contains information about the submitted changelist such as changelist owner, description and file changes.
+## Peforce changelist
+Argument "p4cl" is used to send formatted message of the perforce changelist. Message contains information about changelist such as changelist owner, description and all of the file changes.
 
 **SlackerCmd.exe config=config.json p4cl=123**
 
 #### Perforce post-submit announcement
-With 'p4cl' argument you can integrate perforce post-submit announcement to you slack channels by adding custom p4 trigger hook.
+Perforce changelist message can be used with perforce post-submit triggers and send messages automatically after changelist submit.
 
+How to integrate with P4
 1. Create slack bot
-2. Deploy slacker to your perforce machine
-3. Configure slacker config.json file with your slack and perforce settings
-4. Add p4 trigger to post-submit
- 1. **SlackerCmd.exe config=config.json p4cl=%changelist%**
+2. Deploy slacker cmd tool to your perforce machine
+3. Configure slacker config.json file with your slack (name, channel and token) and perforce (port, username, password) settings
+4. Add new p4 trigger to **post-submit** (Note! Only users with p4 admin rights can edit triggers)
+ 1. SlackerCmd.exe config=config.json p4cl=%changelist%
  
 ## Peforce changelist validation
 With 'p4validatecl' argument you can integrate pre-submit validation for changelists. Slacker will validate changelist content and either approves or interrupts submit by sending 0 or -1 return code.
 
 1. Create slack bot (optional)
-2. Deploy slacker to your perforce machine
-3. Configure slacker config.json file with your slack and perforce settings
-4. Add p4 trigger to pre-submit
- 1. **SlackerCmd.exe config=config.json p4validatecl=%changelist%**
+2. Deploy slacker cmd tool to your perforce machine
+3. Configure slacker config.json file with your slack (name, channel and token) and perforce (port, username, password) settings
+4. Add new p4 trigger to **pre-submit**
+ 1. SlackerCmd.exe config=config.json p4validatecl=%changelist%
 
 ## Direct message
-You can also send messages directly with message argument.
+Argument 'message' can be used to send messages directly. Remember to use quotation marks around message.
 
 **SlackerCmd.exe config=config.json message="Hello World!"**
 
