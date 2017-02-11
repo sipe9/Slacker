@@ -3,7 +3,7 @@
 Slacker is command line tool written in C# that sends formatted messages to Slack.
 
 # How to use
-Slacker parses commanline arguments and executes desired operations. Arguments can be passed individially or common settings such as perforce and slack settings can be piped with json configuration file.
+Slacker parses commanline arguments and executes desired operations. Arguments can be passed individially or with json configuration file. When both file and arguments are used, config file is first loaded and then individual arguments may override any configuration.
 
 ## Peforce changelist
 Argument "p4cl" is used to send formatted message of the perforce changelist. Message contains information about changelist such as changelist owner, description and all of the file changes.
