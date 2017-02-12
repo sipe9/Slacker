@@ -29,11 +29,14 @@ namespace SlackerCmd
 
         public string Password { get; set; }
 
+        public string Ticket { get; set; }
+
         public P4Configuration()
         {
             this.Port = "127.0.0.1:1666";
             this.Username = "admin";
             this.Password = String.Empty;
+            this.Ticket = String.Empty;
         }
     }
 
@@ -96,6 +99,9 @@ namespace SlackerCmd
 
         public List<P4DescriptionRule> P4DescriptionRules { get; }
 
+        [JsonIgnore]
+        public bool DebugMessage { get; set; }
+
         public Configuration()
         {
             this.P4 = new P4Configuration();
@@ -154,6 +160,12 @@ namespace SlackerCmd
                 P4.Port = Port;
             }
 
+            var Ticket = ArgumentHelper.GetValue(Args, "p4ticket");
+            if (!String.IsNullOrEmpty(Ticket))
+            {
+                P4.Ticket = Ticket;
+            }
+
             var Channel = ArgumentHelper.GetValue(Args, "channel");
             if (!String.IsNullOrEmpty(Channel))
             {
@@ -193,6 +205,8 @@ namespace SlackerCmd
             {
                 ShowPostSubmitFileChanges = ArgumentHelper.GetValueBoolean(Args, "p4showfiles");
             }
+
+            DebugMessage = ArgumentHelper.Has(Args, "debugmessage");
         }
 
         public static void SaveDefaultConfigFile(string FilePath)

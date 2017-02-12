@@ -10,29 +10,11 @@ namespace SlackerCmd
 {
     class MessageHelper
     {
-        public static SlackRichPayload BuildPostSubmitPayload(Perforce.P4.Repository Repository, int ChangelistNumber, Configuration Config)
+        public static SlackRichPayload BuildPostSubmitPayload(Perforce.P4.Changelist Changelist, Configuration Config)
         {
-            if (Repository == null)
+            if (Changelist == null)
             {
-                Console.WriteLine(String.Format("[Slacker] Failed to build post submit string because repository is null. Please check your P4 configurations and try again."));
-                return null;
-            }
-
-            Perforce.P4.Changelist Changelist = null;
-
-            try
-            {
-                Changelist = Repository.GetChangelist(ChangelistNumber);
-
-                if (Changelist == null)
-                {
-                    Console.WriteLine(String.Format("[Slacker] Failed to find changelist {0} from repository. Please check changelist number and try again.", ChangelistNumber));
-                    return null;
-                }
-            }
-            catch (Perforce.P4.P4Exception ex)
-            {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("[Slacker] Failed to build post-submit payload becuase changelist {0} is null."));
                 return null;
             }
 
@@ -64,10 +46,14 @@ namespace SlackerCmd
                     {
                         Title = Changelist.Description,
                         Text = FileGroupSB.ToString(),
-                    }
-                    
+                    }                    
                 }
             };
+
+            if (!String.IsNullOrEmpty(Config.Slack.Channel))
+            {
+                Payload.Channel = Config.Slack.Channel;
+            }
 
             return Payload;
         }
@@ -132,7 +118,7 @@ namespace SlackerCmd
         }
 
         // Send slack message
-        public static async Task<string> SendSlackMessage(SlackRichPayload Payload, SlackConfiguration SlackConfig)
+        public static async Task<string> SendSlackMessage(SlackRichPayload Payload, Configuration Config)
         {
             if (Payload == null)
             {
@@ -140,39 +126,48 @@ namespace SlackerCmd
                 return string.Empty;
             }
 
-            if (String.IsNullOrEmpty(SlackConfig.SlackBotUrl) || String.IsNullOrEmpty(SlackConfig.Channel))
+            if (String.IsNullOrEmpty(Config.Slack.SlackBotUrl) || String.IsNullOrEmpty(Config.Slack.Channel))
             {
-                Console.WriteLine(String.Format("[Slacker] Failed to send slack message because slack url {0} or channel {1} is empty or null.", SlackConfig.SlackBotUrl, SlackConfig.Channel));
+                Console.WriteLine(String.Format("[Slacker] Failed to send slack message because slack url {0} or channel {1} is empty or null.", Config.Slack.SlackBotUrl, Config.Slack.Channel));
                 return String.Empty;
             }
 
-            using (var Client = new HttpClient())
+            if (Config.DebugMessage)
             {
-                if (SlackConfig.UseRichFormatting)
+                var SerializePayload = JsonConvert.SerializeObject(Payload);
+                Console.WriteLine(String.Format("[Slacker] Debug message: {0}", SerializePayload));
+                return String.Empty;
+            }
+            else
+            {
+                using (var Client = new HttpClient())
                 {
-                    if (String.IsNullOrEmpty(SlackConfig.WebHookUrl))
+                    if (Config.Slack.UseRichFormatting)
                     {
-                        Console.WriteLine(String.Format("[Slacker] Failed to send rich formatted message because webhook URL is empty or null!."));
-                        return String.Empty;
+                        if (String.IsNullOrEmpty(Config.Slack.WebHookUrl))
+                        {
+                            Console.WriteLine(String.Format("[Slacker] Failed to send rich formatted message because webhook URL is empty or null!."));
+                            return String.Empty;
+                        }
+
+                        var SerializePayload = JsonConvert.SerializeObject(Payload);
+
+                        Console.WriteLine(String.Format("[Slacker] Sending slack payload to {0}.", Config.Slack.WebHookUrl));
+
+                        var Response = await Client.PostAsync(Config.Slack.WebHookUrl, new StringContent(SerializePayload, new UTF8Encoding(), "application/json"));
+                        var ResponseString = await Response.Content.ReadAsStringAsync();
+                        Console.WriteLine(String.Format("[Slacker] HTTP response: {0}", ResponseString));
+                        return ResponseString;
                     }
+                    else
+                    {
+                        Console.WriteLine(String.Format("[Slacker] Sending slack bot message to {0}.", Config.Slack.SlackBotUrl));
 
-                    var SerializePayload = JsonConvert.SerializeObject(Payload);
-
-                    Console.WriteLine(String.Format("[Slacker] Sending slack payload to {0}.", SlackConfig.WebHookUrl));
-
-                    var Response = await Client.PostAsync(SlackConfig.WebHookUrl, new StringContent(SerializePayload, new UTF8Encoding(), "application/json"));
-                    var ResponseString = await Response.Content.ReadAsStringAsync();
-                    Console.WriteLine(String.Format("[Slacker] HTTP response: {0}", ResponseString));
-                    return ResponseString;
-                }
-                else
-                {
-                    Console.WriteLine(String.Format("[Slacker] Sending slack bot message to {0}.", SlackConfig.SlackBotUrl));
-
-                    var Response = await Client.PostAsync(SlackConfig.SlackBotUrl, new StringContent(Payload.Text));
-                    var ResponseString = await Response.Content.ReadAsStringAsync();
-                    Console.WriteLine(String.Format("[Slacker] HTTP response: {0}", ResponseString));
-                    return ResponseString;
+                        var Response = await Client.PostAsync(Config.Slack.SlackBotUrl, new StringContent(Payload.Text));
+                        var ResponseString = await Response.Content.ReadAsStringAsync();
+                        Console.WriteLine(String.Format("[Slacker] HTTP response: {0}", ResponseString));
+                        return ResponseString;
+                    }
                 }
             }
         }

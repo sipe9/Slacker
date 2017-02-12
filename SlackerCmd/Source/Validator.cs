@@ -9,33 +9,13 @@ namespace SlackerCmd
 {
     public class Validator
     {
-        public static bool HasIllegalPaths(Perforce.P4.Repository Repository, int ChangelistNumber, Configuration Config, out string Error)
+        public static bool HasIllegalPaths(Perforce.P4.Changelist Changelist, Configuration Config, out string Error)
         {
             Error = String.Empty;
 
-            if (Repository == null)
+            if (Changelist == null)
             {
-                Error = String.Format("[Slacker] Failed to check illegal paths from changelist because repository is null. Please check your P4 configurations and try again.");
-                Console.WriteLine(Error);
-                return false;
-            }
-
-            Perforce.P4.Changelist Changelist = null;
-
-            try
-            {
-                Changelist = Repository.GetChangelist(ChangelistNumber);
-
-                if (Changelist == null)
-                {
-                    Error = String.Format("[Slacker] Failed to search illegal paths from changelist because changelist {0} was not found from perforce repository.", ChangelistNumber);
-                    Console.WriteLine(Error);
-                    return false;
-                }
-            }
-            catch (Perforce.P4.P4Exception ex)
-            {
-                Error = String.Format(ex.Message);
+                Error = String.Format("[Slacker] Failed to check illegal paths from change list because change list is null. Please check your P4 configurations and try again.");
                 Console.WriteLine(Error);
                 return false;
             }
@@ -65,37 +45,17 @@ namespace SlackerCmd
             return false;
         }
 
-        public static bool IsValidDescription(Perforce.P4.Repository Repository, int ChangelistNumber, Configuration Config, out string Error)
+        public static bool IsValidDescription(Perforce.P4.Changelist Changelist, Configuration Config, out string Error)
         {
-            if (Repository == null)
-            {
-                Error = String.Format("[Slacker] Failed to build post submit string because repository is null. Please check your P4 configurations and try again.");
-                Console.WriteLine(Error);
-                return false;
-            }
-
             Error = String.Empty;
 
-            Perforce.P4.Changelist Changelist = null;
-
-            try
+            if (Changelist == null)
             {
-                Changelist = Repository.GetChangelist(ChangelistNumber);
-
-                if (Changelist == null)
-                {
-                    Error = String.Format("[Slacker] Failed to check submit description becuase changelist because changelist {0} was not found from perforce repository.", ChangelistNumber);
-                    Console.WriteLine(Error);
-                    return false;
-                }
-            }
-            catch (Perforce.P4.P4Exception ex)
-            {
-                Error = String.Format(ex.Message);
+                Error = String.Format("[Slacker] Failed to build post submit string because change list is null. Please check your P4 configurations and try again.");
                 Console.WriteLine(Error);
                 return false;
-            }
-            
+            }            
+           
             var Description = Changelist.Description;
 
             // [Ticket-241][Reviewer: John Doe] Description here

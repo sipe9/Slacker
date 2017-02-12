@@ -37,9 +37,9 @@ namespace SlackerCmd
         private P4Instance() {}
         #endregion
 
-        public Perforce.P4.Server Server { get; private set; }
-        public Perforce.P4.Repository Repository { get; private set; }
-        public Perforce.P4.Connection Connection { get; private set; }
+        private Perforce.P4.Server Server { get; set; }
+        private Perforce.P4.Repository Repository { get; set; }
+        private Perforce.P4.Connection Connection { get; set; }
 
         private bool _intiailized = false;
         public bool Initialized
@@ -63,12 +63,7 @@ namespace SlackerCmd
             return false;
         }
 
-        public bool Connect()
-        {
-            return Connect(String.Empty);
-        }
-
-        public bool Connect(string Password)
+        public bool Connect(P4Configuration Config)
         {
             if (Connection == null)
             {
@@ -90,9 +85,9 @@ namespace SlackerCmd
                 return false;
             }
 
-            if (!String.IsNullOrEmpty(Password))
+            if (!String.IsNullOrEmpty(Config.Password))
             {
-                var Cred = Connection.Login(Password);
+                var Cred = Connection.Login(Config.Password);
                 if (Cred == null)
                 {
                     Console.WriteLine(String.Format("[Slacker] Failed to login perforce server. username={0} port={1}", Connection.UserName, Server.Address));
@@ -139,11 +134,11 @@ namespace SlackerCmd
             _intiailized = false;
         }
 
-        public bool HandlePostSubmit(Perforce.P4.Repository Repository, int Changelist, Configuration Config)
+        public bool HandlePostSubmit(Perforce.P4.Changelist Changelist, Configuration Config)
         {
-            if (Repository == null)
+            if (Changelist == null)
             {
-                Console.WriteLine(String.Format("[Slacker] Failed to handle post-submit because repository is null. Please check your P4 configurations and try again."));
+                Console.WriteLine(String.Format("[Slacker] Failed to handle post-submit because change list is null. Please check your P4 configurations and try again."));
                 return false;
             }
 
@@ -160,7 +155,7 @@ namespace SlackerCmd
                 return false;
             }
 
-            var Payload = MessageHelper.BuildPostSubmitPayload(Repository, Changelist, Config);
+            var Payload = MessageHelper.BuildPostSubmitPayload(Changelist, Config);
             if (Payload == null)
             {
                 return false;
@@ -168,18 +163,18 @@ namespace SlackerCmd
 
             Task.Run(async () =>
             {
-                var response = await MessageHelper.SendSlackMessage(Payload, Config.Slack);
+                var response = await MessageHelper.SendSlackMessage(Payload, Config);
 
             }).Wait();
 
             return true;
         }
 
-        public bool HandlePreSubmit(Perforce.P4.Repository Repository, int Changelist, Configuration Config)
+        public bool HandlePreSubmit(Perforce.P4.Changelist Changelist, Configuration Config)
         {
-            if (Repository == null)
+            if (Changelist == null)
             {
-                Console.WriteLine(String.Format("[Slacker] Failed to handle pre-submit because repository is null. Please check your P4 configurations and try again."));
+                Console.WriteLine(String.Format("[Slacker] Failed to handle pre-submit because change list is null. Please check your P4 configurations and try again."));
                 return false;
             }
 
@@ -192,18 +187,55 @@ namespace SlackerCmd
             var Error = String.Empty;
 
             // Check for illegal paths and extensions
-            if (Validator.HasIllegalPaths(Repository, Changelist, Config, out Error))
+            if (Validator.HasIllegalPaths(Changelist, Config, out Error))
             {
                 return false;
             }
 
             // Validate description based on rules
-            if (Config.P4DescriptionRules.Count > 0 && !Validator.IsValidDescription(Repository, Changelist, Config, out Error))
+            if (Config.P4DescriptionRules.Count > 0 && !Validator.IsValidDescription(Changelist, Config, out Error))
             {
                 return false;
             }
 
             return true;
+        }
+
+        public Perforce.P4.Changelist GetChangeList(int ChangelistNumber, Configuration Config)
+        {
+            if (Repository == null)
+            {
+                Console.WriteLine(String.Format("[Slacker] Failed to get changelist {0} because repository is null. Please check your P4 configurations and try again."), ChangelistNumber);
+                return null;
+            }
+
+            try
+            {
+                if (!String.IsNullOrEmpty(Config.P4.Ticket))
+                {
+                    var Changelist = Repository.GetChangelist(ChangelistNumber);
+                    if (Changelist != null)
+                    {
+                        return Changelist;
+                    }
+                }
+                else
+                {
+                    var Changelist = Repository.GetChangelist(ChangelistNumber);
+                    if (Changelist != null)
+                    {
+                        return Changelist;
+                    }
+                }
+            }
+            catch (Perforce.P4.P4Exception ex)
+            {
+                Console.WriteLine(String.Format(ex.Message));
+            }
+
+            Console.WriteLine(String.Format("[Slacker] Failed to get changelist {0}.", ChangelistNumber));
+
+            return null;
         }
     }
 }
