@@ -45,12 +45,17 @@ namespace SlackerCmd
 
         public List<IllegalPaths> IllegalPaths { get; set; }
 
+        public string WebHookUrl { get; set; }
+        public bool UseRichFormatting { get; set; }
+
         public SlackConfiguration()
         {
             this.Name = "yourslackname";
             this.Channel = "general";
             this.Token = "yourslacktoken";
             this.IllegalPaths = new List<IllegalPaths>();
+            this.WebHookUrl = string.Empty;
+            this.UseRichFormatting = false;
         }
 
         public bool IsValid()
@@ -68,7 +73,7 @@ namespace SlackerCmd
         }
 
         [JsonIgnore]
-        public string Url
+        public string SlackBotUrl
         {
             get
             {
@@ -165,6 +170,17 @@ namespace SlackerCmd
             if (!String.IsNullOrEmpty(Name))
             {
                 Slack.Name = Name;
+            }
+
+            var WebHookUrl = ArgumentHelper.GetValue(Args, "webhookurl");
+            if (!String.IsNullOrEmpty(WebHookUrl))
+            {
+                Slack.WebHookUrl = WebHookUrl;
+            }
+
+            if (ArgumentHelper.Has(Args, "userichformat"))
+            {
+                Slack.UseRichFormatting = ArgumentHelper.GetValueBoolean(Args, "userichformat");
             }
 
             var FileLimit = ArgumentHelper.GetValueInt(Args, "p4filelimit");

@@ -96,7 +96,13 @@ namespace SlackerCmd
                 {
                     Task.Run(async () =>
                     {
-                        var response = await MessageHelper.SendSlackMessage(Message, Config.Slack);
+                        var Payload = new SlackRichPayload()
+                        {
+                            Username = "Slack bot",
+                            Text = Message
+                        };
+
+                        var response = await MessageHelper.SendSlackMessage(Payload, Config.Slack);
 
                     }).Wait();
                 }

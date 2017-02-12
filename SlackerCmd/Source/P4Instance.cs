@@ -160,15 +160,15 @@ namespace SlackerCmd
                 return false;
             }
 
-            var SubmitMessage = MessageHelper.BuildPostSubmitString(Repository, Changelist, Config);
-            if (String.IsNullOrEmpty(SubmitMessage))
+            var Payload = MessageHelper.BuildPostSubmitPayload(Repository, Changelist, Config);
+            if (Payload == null)
             {
                 return false;
             }
 
             Task.Run(async () =>
             {
-                var response = await MessageHelper.SendSlackMessage(SubmitMessage, Config.Slack);
+                var response = await MessageHelper.SendSlackMessage(Payload, Config.Slack);
 
             }).Wait();
 
