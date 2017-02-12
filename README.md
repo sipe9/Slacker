@@ -55,6 +55,12 @@ Or without configuration file.
 **token=slacktoken**
 *Slack token*
 
+**webhookurl=url**
+*Slack webhook url*
+
+**userichformat=true/false**
+*If we should use right formatting (slack webhook url) or simple message without formatting.*
+
 **message="your slack message here"**
 *Slack message (message inside quotation marks)*
             
@@ -97,7 +103,9 @@ Output is formatted json config file.
     "Name": "yourslackname",
     "Channel": "general",
     "Token": "yourslacktoken",
-    "IllegalPaths": []
+    "IllegalPaths": [],
+    "WebHookUrl": "",
+    "UseRichFormatting": false
   },
   "FileActionLimit": 8,
   "IllegalPaths": [],
