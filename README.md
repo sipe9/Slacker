@@ -2,6 +2,13 @@
 
 Slacker is command line tool written in C# that sends formatted messages to Slack.
 
+## TODO
+1. Take P4 ticket property into use
+2. Expose all of the rich message properties with arguments
+  1. Base message properties
+  2. Attachments
+    1. Attachment fields
+
 # How to use
 Slacker parses commanline arguments and executes desired operations. Arguments can be passed individially or with json configuration file. When both file and arguments are used, config file is first loaded and then individual arguments may override any configuration.
 
@@ -127,7 +134,6 @@ Output is formatted json config file.
   ]
 }
 ```
-
 ## External libraries
 * Json.NET
 * p4api.net
