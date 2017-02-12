@@ -64,7 +64,7 @@ Or without configuration file.
 **message="your slack message here"**
 *Slack message (message inside quotation marks)*
             
-**p4cl=changelist#**
+**p4cl=changelistnumber**
 *Sends formatted slack message about changelist. Useful with P4 post-submit trigger.*
 
 **p4filelimit=8**
