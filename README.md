@@ -56,7 +56,7 @@ Or without configuration file.
 *Slack token*
 
 **webhookurl=url**
-*Slack webhook url*
+*Slack webhook url (required if rich formatting used)*
 
 **userichformat=true/false**
 *If we should use right formatting (slack webhook url) or simple message without formatting.*
