@@ -89,7 +89,7 @@ Or without configuration file.
 *P4 password used to login.*
 
 **p4ticket=0123456789ABCDEF**
-*P4 ticket. (Currently not used)*
+*P4 ticket. (Currently not used, use password instead)*
 
 ## Config template
 Commandline argument 'configtemplate' can be used to generate config template.
