@@ -63,6 +63,9 @@ Or without configuration file.
 
 **message="your slack message here"**
 *Slack message (message inside quotation marks)*
+
+**debugmessage**
+*Only prints message to console output and doesn't send it to Slack.
             
 **p4cl=changelistnumber**
 *Sends formatted slack message about changelist. Useful with P4 post-submit trigger.*
@@ -82,8 +85,11 @@ Or without configuration file.
 **p4port=127.0.0.1:1667**
 *P4 server IP address and port.*
 
-**p4password=123456789**
+**p4password=0123456789**
 *P4 password used to login.*
+
+**p4ticket=0123456789ABCDEF**
+*P4 ticket. (Currently not used)*
 
 ## Config template
 Commandline argument 'configtemplate' can be used to generate config template.
@@ -97,7 +103,8 @@ Output is formatted json config file.
   "P4": {
     "Port": "127.0.0.1:1666",
     "Username": "admin",
-    "Password": ""
+    "Password": "",
+    "Ticket": ""
   },
   "Slack": {
     "Name": "yourslackname",
