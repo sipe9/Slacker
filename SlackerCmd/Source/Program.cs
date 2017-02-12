@@ -56,7 +56,7 @@ namespace SlackerCmd
             {
                 P4Instance.Instance.Initialize(Config.P4);
 
-                if (!P4Instance.Instance.Connect())
+                if (!P4Instance.Instance.Connect(Config.P4.Password))
                 {
                     RetCode = -1;
                     goto End;
