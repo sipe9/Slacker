@@ -146,8 +146,6 @@ namespace SlackerCmd
                 return String.Empty;
             }
 
-            Console.WriteLine(String.Format("[Slacker] Sending slack message to {0}.", SlackConfig.SlackBotUrl));
-
             using (var Client = new HttpClient())
             {
                 if (SlackConfig.UseRichFormatting)
@@ -160,6 +158,8 @@ namespace SlackerCmd
 
                     var SerializePayload = JsonConvert.SerializeObject(Payload);
 
+                    Console.WriteLine(String.Format("[Slacker] Sending slack payload to {0}.", SlackConfig.WebHookUrl));
+
                     var Response = await Client.PostAsync(SlackConfig.WebHookUrl, new StringContent(SerializePayload, new UTF8Encoding(), "application/json"));
                     var ResponseString = await Response.Content.ReadAsStringAsync();
                     Console.WriteLine(String.Format("[Slacker] HTTP response: {0}", ResponseString));
@@ -167,6 +167,8 @@ namespace SlackerCmd
                 }
                 else
                 {
+                    Console.WriteLine(String.Format("[Slacker] Sending slack bot message to {0}.", SlackConfig.SlackBotUrl));
+
                     var Response = await Client.PostAsync(SlackConfig.SlackBotUrl, new StringContent(Payload.Text));
                     var ResponseString = await Response.Content.ReadAsStringAsync();
                     Console.WriteLine(String.Format("[Slacker] HTTP response: {0}", ResponseString));
