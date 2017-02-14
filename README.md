@@ -22,11 +22,12 @@ Argument "p4cl" is used to send formatted message of the perforce changelist. Me
 Perforce changelist message can be used with perforce post-submit triggers and send messages automatically after changelist submit.
 
 How to integrate with P4
+
 1. Create slack bot
 2. Deploy slacker cmd tool to your perforce machine
 3. Configure slacker config.json file with your slack (name, channel and token) and perforce (port, username, password) settings
 4. Add new p4 trigger to **post-submit** (Note! Only users with p4 admin rights can edit triggers)
- 1. SlackerCmd.exe config=config.json p4cl=%changelist%
+  1. SlackerCmd.exe config=config.json p4cl=%changelist%
  
 ## Peforce changelist validation
 With 'p4validatecl' argument you can integrate pre-submit validation for changelists. Slacker will validate changelist content and either approves or interrupts submit by sending 0 or -1 return code.
