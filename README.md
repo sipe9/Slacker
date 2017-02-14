@@ -74,7 +74,7 @@ Or without configuration file.
 *Slack message (message inside quotation marks)*
 
 **debugmessage**
-*Only prints message to console output and doesn't send it to Slack.
+*Only prints message to console output and doesn't send it to Slack.*
             
 **p4cl=changelistnumber**
 *Sends formatted slack message about changelist. Useful with P4 post-submit trigger.*
