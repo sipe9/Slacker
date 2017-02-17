@@ -71,7 +71,7 @@ Argument 'message' and 'channel' can be used with message file to override these
 *Slack incoming webhook url (required if rich formatting used)*
 
 **userichformat=true or false**
-*If we should use right formatting (slack webhook url) or simple message without formatting.*
+*Use rich formatting (slack incoming webhook) or simple message with slack bot.*
 
 **message="your slack message here"**
 *Slack message (message inside quotation marks)*
