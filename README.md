@@ -45,7 +45,7 @@ Argument 'message' can be used to send messages directly. Remember to use quotat
 
 Or without configuration file.
 
-**SlackerCmd.exe name=yourslackname channel=general token=yourslacktoken message="Hello World!"**
+**SlackerCmd.exe name=yourslackname channel=general bottoken=yourslacktoken message="Hello World!"**
 
 ## List of commanline arguments
 
