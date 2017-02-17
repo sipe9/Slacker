@@ -151,8 +151,9 @@ Commandline argument 'payloadtemplate' can be used to generate slack message pay
 
 **SlackerCmd.exe payloadtemplate=MessagePayload.json**
 
-```
 Output is formatted json file for slack message payloads.
+
+```
 {
   "text": "Main text",
   "username": "Username",
