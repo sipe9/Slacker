@@ -21,13 +21,13 @@ Argument "p4cl" is used to send formatted message of the perforce changelist. Me
 #### Perforce post-submit announcement
 Perforce changelist message can be used with perforce post-submit triggers and send messages automatically after changelist submit.
 
-How to integrate with P4
+**How to integrate with P4**
 
 1. Create slack bot
 2. Deploy slacker cmd tool to your perforce machine
 3. Configure slacker config.json file with your slack (name, channel and token) and perforce (port, username, password) settings
 4. Add new p4 trigger to **post-submit** (Note! Only users with p4 admin rights can edit triggers)
-  1. SlackerCmd.exe config=config.json p4cl=%changelist%
+   1. SlackerCmd.exe config=config.json p4cl=%changelist%
  
 ## Peforce changelist validation
 With 'p4validatecl' argument you can integrate pre-submit validation for changelists. Slacker will validate changelist content and either approves or interrupts submit by sending 0 or -1 return code.
@@ -36,7 +36,7 @@ With 'p4validatecl' argument you can integrate pre-submit validation for changel
 2. Deploy slacker cmd tool to your perforce machine
 3. Configure slacker config.json file with your slack (name, channel and token) and perforce (port, username, password) settings
 4. Add new p4 trigger to **pre-submit**
- 1. SlackerCmd.exe config=config.json p4validatecl=%changelist%
+   1. SlackerCmd.exe config=config.json p4validatecl=%changelist%
 
 ## Direct message
 Argument 'message' can be used to send messages directly. Remember to use quotation marks around message.
@@ -45,7 +45,7 @@ Argument 'message' can be used to send messages directly. Remember to use quotat
 
 Or without configuration file.
 
-**SlackerCmd.exe name=yourslackname channel=general token=yourslacktoken message="Hello World!"**
+**SlackerCmd.exe name=yourslackname channel=general bottoken=yourslacktoken message="Hello World!"**
 
 ## List of commanline arguments
 
@@ -55,19 +55,19 @@ Or without configuration file.
 **configtemplate=output.json**
 *Generate configuration template file*
 
-**name=slackname**
+**name=slack name**
 *Slack name [xxx.slack.com]*
 
-**channel=slackchannel**
+**channel=slack channel**
 *Slack channel*
 
-**token=slacktoken**
-*Slack token*
+**bottoken=slack bot token**
+*Slack bot token*
 
-**webhookurl=url**
-*Slack webhook url (required if rich formatting used)*
+**incomingwebhookurl=url**
+*Slack incoming webhook url (required if rich formatting used)*
 
-**userichformat=true/false**
+**userichformat=true or false**
 *If we should use right formatting (slack webhook url) or simple message without formatting.*
 
 **message="your slack message here"**
@@ -113,27 +113,30 @@ Output is formatted json config file.
     "Port": "127.0.0.1:1666",
     "Username": "admin",
     "Password": "",
-    "Ticket": ""
+    "Ticket": "",
+    "PostSubmit": {
+      "ShowFileChanges": true,
+      "FileActionLimit": 8
+    },
+    "PreSubmitValidation": {
+      "IllegalPaths": [],
+      "Rules": [
+        {
+          "ContentRequired": true,
+          "StartWith": "[",
+          "EndstWith": "]",
+          "ContentStrings": []
+        }
+      ]
+    }
   },
   "Slack": {
     "Name": "yourslackname",
     "Channel": "general",
-    "Token": "yourslacktoken",
-    "IllegalPaths": [],
-    "WebHookUrl": "",
+    "BotToken": "yourslacktoken",
+    "IncomingWebHookUrl": "",
     "UseRichFormatting": false
-  },
-  "FileActionLimit": 8,
-  "IllegalPaths": [],
-  "ShowPostSubmitFileChanges": true,
-  "P4DescriptionRules": [
-    {
-      "ContentRequired": true,
-      "StartWith": "[",
-      "EndstWith": "]",
-      "ContentStrings": []
-    }
-  ]
+  }
 }
 ```
 ## External libraries
