@@ -19,9 +19,9 @@ namespace SlackerCmd
             }
 
             var FileString = new List<string>();
-            if (Config.ShowPostSubmitFileChanges)
+            if (Config.P4.PostSubmit.ShowFileChanges)
             {
-                FileString = MessageHelper.BuildFileActionString(Changelist, Config.FileActionLimit);
+                FileString = MessageHelper.BuildFileActionString(Changelist, Config.P4.PostSubmit.FileActionLimit);
             }
 
             var Message = String.Format("{0} has submitted changelist #{1}.", Changelist.OwnerName, Changelist.Id);
@@ -144,7 +144,7 @@ namespace SlackerCmd
                 {
                     if (Config.Slack.UseRichFormatting)
                     {
-                        if (String.IsNullOrEmpty(Config.Slack.WebHookUrl))
+                        if (String.IsNullOrEmpty(Config.Slack.IncomingWebHookUrl))
                         {
                             Console.WriteLine(String.Format("[Slacker] Failed to send rich formatted message because webhook URL is empty or null!."));
                             return String.Empty;
@@ -152,9 +152,9 @@ namespace SlackerCmd
 
                         var SerializePayload = JsonConvert.SerializeObject(Payload);
 
-                        Console.WriteLine(String.Format("[Slacker] Sending slack payload to {0}.", Config.Slack.WebHookUrl));
+                        Console.WriteLine(String.Format("[Slacker] Sending slack payload to {0}.", Config.Slack.IncomingWebHookUrl));
 
-                        var Response = await Client.PostAsync(Config.Slack.WebHookUrl, new StringContent(SerializePayload, new UTF8Encoding(), "application/json"));
+                        var Response = await Client.PostAsync(Config.Slack.IncomingWebHookUrl, new StringContent(SerializePayload, new UTF8Encoding(), "application/json"));
                         var ResponseString = await Response.Content.ReadAsStringAsync();
                         Console.WriteLine(String.Format("[Slacker] HTTP response: {0}", ResponseString));
                         return ResponseString;

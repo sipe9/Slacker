@@ -11,25 +11,82 @@ namespace SlackerCmd
     public class IllegalPaths
     {
         public string Extension { get; set; }
-
         public string DepotDirectory { get; set; }
 
-        public IllegalPaths(string extension, string depotDirectory)
+        public IllegalPaths(string Extension, string DepotDirectory)
         {
-            this.Extension = extension;
-            this.DepotDirectory = depotDirectory;
+            this.Extension = Extension;
+            this.DepotDirectory = DepotDirectory;
+        }
+    }
+
+    public class P4PostSubmit
+    {
+        public bool ShowFileChanges { get; set; }
+        public int FileActionLimit { get; set; }        
+
+        public P4PostSubmit()
+        {
+            this.ShowFileChanges = true;
+            this.FileActionLimit = 8;            
+        }        
+    }
+
+    public class P4ValidationRule
+    {
+        public bool ContentRequired { get; set; }
+        public string StartWith { get; set; }
+        public string EndstWith { get; set; }
+        public List<string> ContentStrings { get; }
+
+        public P4ValidationRule()
+        {
+            this.ContentRequired = true;
+            this.StartWith = "[";
+            this.EndstWith = "]";
+            this.ContentStrings = new List<string>();
+        }
+
+        public bool IsValid(string Description, out String Error)
+        {
+            Error = String.Empty;
+
+            if (ContentRequired && String.IsNullOrEmpty(Description))
+            {
+                Error = String.Format("Description cannot be empty!");
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    public class P4PreSubmitValidation
+    {
+        public List<IllegalPaths> IllegalPaths { get; set; }
+        public List<P4ValidationRule> Rules { get; }        
+
+        public P4PreSubmitValidation()
+        {
+            this.IllegalPaths = new List<IllegalPaths>();
+
+            this.Rules = new List<P4ValidationRule>();
+            var RequireDecription = new P4ValidationRule()
+            {
+                ContentRequired = true
+            };            
+            this.Rules.Add(RequireDecription);
         }
     }
 
     public class P4Configuration
     {
         public string Port { get; set; }
-
         public string Username { get; set; }
-
         public string Password { get; set; }
-
         public string Ticket { get; set; }
+        public P4PostSubmit PostSubmit { get; set; }
+        public P4PreSubmitValidation PreSubmitValidation { get; set; }
 
         public P4Configuration()
         {
@@ -37,6 +94,8 @@ namespace SlackerCmd
             this.Username = "admin";
             this.Password = String.Empty;
             this.Ticket = String.Empty;
+            this.PostSubmit = new P4PostSubmit();
+            this.PreSubmitValidation = new P4PreSubmitValidation();
         }
     }
 
@@ -44,30 +103,22 @@ namespace SlackerCmd
     {
         public string Name { get; set; }
         public string Channel { get; set; }
-        public string Token { get; set; }
-
-        public List<IllegalPaths> IllegalPaths { get; set; }
-
-        public string WebHookUrl { get; set; }
+        public string BotToken { get; set; }        
+        public string IncomingWebHookUrl { get; set; }
         public bool UseRichFormatting { get; set; }
 
         public SlackConfiguration()
         {
             this.Name = "yourslackname";
             this.Channel = "general";
-            this.Token = "yourslacktoken";
-            this.IllegalPaths = new List<IllegalPaths>();
-            this.WebHookUrl = string.Empty;
+            this.BotToken = "yourslacktoken";
+            this.IncomingWebHookUrl = string.Empty;
             this.UseRichFormatting = false;
         }
 
         public bool IsValid()
         {
-            if (this.Name.Equals("yourslackname"))
-            {
-                return false;
-            }
-            else if (this.Token.Equals("yourslacktoken"))
+            if (this.Name.Equals("yourslackname") || this.BotToken.Equals("yourslacktoken"))
             {
                 return false;
             }
@@ -80,7 +131,7 @@ namespace SlackerCmd
         {
             get
             {
-                return string.Format(@"https://{0}.slack.com/services/hooks/slackbot?token={1}&channel=%23{2}", Name, Token, Channel);
+                return string.Format(@"https://{0}.slack.com/services/hooks/slackbot?token={1}&channel=%23{2}", Name, BotToken, Channel);
             }
         }
     }
@@ -89,15 +140,7 @@ namespace SlackerCmd
     {
         public P4Configuration P4 { get; set; }
 
-        public SlackConfiguration Slack { get; set; }
-
-        public int FileActionLimit { get; set; }
-
-        public List<IllegalPaths> IllegalPaths { get; }
-
-        public bool ShowPostSubmitFileChanges { get; set; }
-
-        public List<P4DescriptionRule> P4DescriptionRules { get; }
+        public SlackConfiguration Slack { get; set; }        
 
         [JsonIgnore]
         public bool DebugMessage { get; set; }
@@ -106,15 +149,6 @@ namespace SlackerCmd
         {
             this.P4 = new P4Configuration();
             this.Slack = new SlackConfiguration();
-
-            this.FileActionLimit = 8;
-            this.IllegalPaths = new List<IllegalPaths>();
-            this.ShowPostSubmitFileChanges = true;
-            this.P4DescriptionRules = new List<P4DescriptionRule>();
-
-            var RequireDecription = new P4DescriptionRule();
-            RequireDecription.ContentRequired = true;
-            this.P4DescriptionRules.Add(RequireDecription);
         }
 
         public static Configuration LoadConfigFile(string FilePath)
@@ -166,16 +200,27 @@ namespace SlackerCmd
                 P4.Ticket = Ticket;
             }
 
+            var FileLimit = ArgumentHelper.GetValueInt(Args, "p4filelimit");
+            if (FileLimit > 0)
+            {
+                P4.PostSubmit.FileActionLimit = FileLimit;
+            }
+
+            if (ArgumentHelper.Has(Args, "p4showfiles"))
+            {
+                P4.PostSubmit.ShowFileChanges = ArgumentHelper.GetValueBoolean(Args, "p4showfiles");
+            }
+
             var Channel = ArgumentHelper.GetValue(Args, "channel");
             if (!String.IsNullOrEmpty(Channel))
             {
                 Slack.Channel = Channel;
             }
 
-            var Token = ArgumentHelper.GetValue(Args, "token");
+            var Token = ArgumentHelper.GetValue(Args, "bottoken");
             if (!String.IsNullOrEmpty(Token))
             {
-                Slack.Token = Token;
+                Slack.BotToken = Token;
             }
 
             var Name = ArgumentHelper.GetValue(Args, "name");
@@ -184,26 +229,15 @@ namespace SlackerCmd
                 Slack.Name = Name;
             }
 
-            var WebHookUrl = ArgumentHelper.GetValue(Args, "webhookurl");
+            var WebHookUrl = ArgumentHelper.GetValue(Args, "incomingwebhookurl");
             if (!String.IsNullOrEmpty(WebHookUrl))
             {
-                Slack.WebHookUrl = WebHookUrl;
+                Slack.IncomingWebHookUrl = WebHookUrl;
             }
 
             if (ArgumentHelper.Has(Args, "userichformat"))
             {
                 Slack.UseRichFormatting = ArgumentHelper.GetValueBoolean(Args, "userichformat");
-            }
-
-            var FileLimit = ArgumentHelper.GetValueInt(Args, "p4filelimit");
-            if (FileLimit > 0)
-            {
-                FileActionLimit = FileLimit;
-            }
-
-            if (ArgumentHelper.Has(Args, "p4showfiles"))
-            {
-                ShowPostSubmitFileChanges = ArgumentHelper.GetValueBoolean(Args, "p4showfiles");
             }
 
             DebugMessage = ArgumentHelper.Has(Args, "debugmessage");
@@ -222,22 +256,6 @@ namespace SlackerCmd
             System.IO.File.WriteAllText(FilePath, ConfigJsonFormatted);
 
             Console.Write(String.Format("[Slacker] Config template saved to {0}.", FilePath));
-        }
-    }
-
-    public class P4DescriptionRule
-    {
-        public bool ContentRequired { get; set; }
-        public string StartWith { get; set; }
-        public string EndstWith { get; set; }
-        public List<string> ContentStrings { get; }
-
-        public P4DescriptionRule()
-        {
-            this.ContentRequired = true;
-            this.StartWith = "[";
-            this.EndstWith = "]";
-            this.ContentStrings = new List<string>();
         }
     }
 }

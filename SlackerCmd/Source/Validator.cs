@@ -31,9 +31,10 @@ namespace SlackerCmd
 
                     if (!String.IsNullOrEmpty(Extension) && !String.IsNullOrEmpty(DepotDirectory))
                     {
-                        foreach (var Pair in Config.IllegalPaths)
+                        foreach (var IllegalPath in Config.P4.PreSubmitValidation.IllegalPaths)
                         {
-                            if (Extension.ToLower() == Pair.Extension.ToLower() && DepotDirectory.ToLower().Contains(Pair.DepotDirectory.ToLower()))
+                            if (Extension.ToLower() == IllegalPath.Extension.ToLower() && 
+                                DepotDirectory.ToLower().Contains(IllegalPath.DepotDirectory.ToLower()))
                             {
                                 return true;
                             }
@@ -58,10 +59,10 @@ namespace SlackerCmd
            
             var Description = Changelist.Description;
 
-            // [Ticket-241][Reviewer: John Doe] Description here
-
-            foreach (var Rule in Config.P4DescriptionRules)
-            {   
+            foreach (var Rule in Config.P4.PreSubmitValidation.Rules)
+            {
+                if (!Rule.IsValid(Description, out Error))
+                    return false;
             }
 
             return true;

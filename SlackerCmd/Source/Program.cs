@@ -131,10 +131,10 @@ namespace SlackerCmd
             Console.WriteLine(String.Format("                                                                 "));
             Console.WriteLine(String.Format(" name=slackname                  Slack name [xxx.slack.com]      "));
             Console.WriteLine(String.Format(" channel=slackchannel            Slack channel                   "));
-            Console.WriteLine(String.Format(" token=slacktoken                Slack token                     "));
+            Console.WriteLine(String.Format(" bottoken=slacktoken             Slack bot token                 "));
             Console.WriteLine(String.Format(" message=\"message here\"        Slack message (message inside quotation marks)"));
             Console.WriteLine(String.Format(" debugmessage=true/false         Slack message is displayed in console but not forwarded to slack."));
-            Console.WriteLine(String.Format(" webhookurl=slackwebhookurl      Slack webhook url (used with rich messages)."));
+            Console.WriteLine(String.Format(" incomingwebhookurl=url          Slack incoming webhook url (used with rich messages)."));
             Console.WriteLine(String.Format(" userichformat=true/false        Slack message formatting.       "));
             Console.WriteLine(String.Format("                                                                 "));
             Console.WriteLine(String.Format(" p4cl=1234                       Sends formatted slack message about changelist. Useful with P4 post-submit trigger."));

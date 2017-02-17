@@ -151,7 +151,7 @@ namespace SlackerCmd
             if (!Config.Slack.IsValid())
             {
                 Console.WriteLine(String.Format("[Slacker] Invalid Slack configurations detected. Please review your Slack configuration and try again."));
-                Console.WriteLine(String.Format("[Slacker] Slack configurations: Name '{0}', Channel '#{1}' and Token '{2}'.", Config.Slack.Name, Config.Slack.Channel, Config.Slack.Token));
+                Console.WriteLine(String.Format("[Slacker] Slack configurations: Name '{0}', Channel '#{1}' and Token '{2}'.", Config.Slack.Name, Config.Slack.Channel, Config.Slack.BotToken));
                 return false;
             }
 
@@ -193,7 +193,7 @@ namespace SlackerCmd
             }
 
             // Validate description based on rules
-            if (Config.P4DescriptionRules.Count > 0 && !Validator.IsValidDescription(Changelist, Config, out Error))
+            if (!Validator.IsValidDescription(Changelist, Config, out Error))
             {
                 return false;
             }
