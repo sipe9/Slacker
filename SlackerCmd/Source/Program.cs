@@ -29,6 +29,13 @@ namespace SlackerCmd
                 return 0;
             }
 
+            var PayloadTemplate = ArgumentHelper.GetValue(Args, "payloadtemplate");
+            if (!String.IsNullOrEmpty(PayloadTemplate))
+            {
+                SlackRichPayload.SaveTemplate(PayloadTemplate, true);
+                return 0;
+            }
+
             Console.WriteLine(String.Format("[Slacker] Running slacker command line."));
 
             var Config = new Configuration();
@@ -92,26 +99,49 @@ namespace SlackerCmd
             }
             else
             {
+                SlackRichPayload Payload = null;
+
+                // First see if we have message file available
+                var MessageFile = ArgumentHelper.GetValue(Args, "messagefile");
+                if (!String.IsNullOrEmpty(MessageFile))
+                {
+                    Payload = SlackRichPayload.LoadFromFile(MessageFile);
+                }
+
+                // Otherwise find message argument
                 var Message = ArgumentHelper.GetValue(Args, "message");
                 if (!String.IsNullOrEmpty(Message))
                 {
-                    Task.Run(async () =>
+                    // If we don't have file already loaded, let's create new payload
+                    if (Payload == null)
                     {
-                        var Payload = new SlackRichPayload()
+                        Payload = new SlackRichPayload()
                         {
                             Username = "Slack bot",
                             Text = Message
                         };
+                    }
+                    // Otherwise override message
+                    else
+                    {
+                        Payload.Text = Message;
+                    }
 
-                        if (!String.IsNullOrEmpty(Config.Slack.Channel))
-                        {
-                            Payload.Channel = Config.Slack.Channel;
-                        }
+                    // Channel override
+                    if (!String.IsNullOrEmpty(Config.Slack.Channel))
+                    {
+                        Payload.Channel = Config.Slack.Channel;
+                    }
+                }
 
+                if (Payload != null)
+                {
+                    Task.Run(async () =>
+                    {
                         var response = await MessageHelper.SendSlackMessage(Payload, Config);
-
                     }).Wait();
                 }
+
             }
 
             End:

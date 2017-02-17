@@ -197,7 +197,7 @@ namespace SlackerCmd
         [JsonProperty("title")]
         public string Title { get; set; }
 
-        [JsonProperty("title_ink")]
+        [JsonProperty("title_link")]
         public string TitleLink { get; set; }
 
         [JsonProperty("pretext")]
@@ -238,6 +238,7 @@ namespace SlackerCmd
 
         public SlackRichPayloadAttachment()
         {
+            this.Fields = new List<SlackRichPayloadAttachmentField>();
         }
     }
 
@@ -261,6 +262,47 @@ namespace SlackerCmd
         public SlackRichPayload()
         {
             this.Attachments = new List<SlackRichPayloadAttachment>();
+        }
+
+        public static SlackRichPayload LoadFromFile(String FilePath)
+        {
+            if (String.IsNullOrEmpty(FilePath))
+            {
+                Console.WriteLine("[Slacker] Failed to load payload from file because path is null or empty.");
+                return null;
+            }
+
+            var FileContent = System.IO.File.ReadAllText(FilePath);
+            if (String.IsNullOrEmpty(FileContent))
+            {
+                Console.WriteLine(String.Format("[Slacker] Payload file is not in valid format. Please check file {0} formatting and try again.", FilePath));
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<SlackRichPayload>(FileContent);
+        }
+
+        public static void SaveTemplate(String FilePath, bool WithAttachment = false)
+        {
+            if (String.IsNullOrEmpty(FilePath))
+            {
+                Console.Write(String.Format("[Slacker] Failed to payload template file because path is empty or null."));
+                return;
+            }
+
+            var Template = new SlackRichPayload();
+
+            if (WithAttachment)
+            {
+                var Attachment = new SlackRichPayloadAttachment();
+                Attachment.Fields.Add(new SlackRichPayloadAttachmentField());
+                Template.Attachments.Add(Attachment);
+            }
+
+            string JsonFormatted = JsonConvert.SerializeObject(Template, Formatting.Indented);
+            System.IO.File.WriteAllText(FilePath, JsonFormatted);
+
+            Console.Write(String.Format("[Slacker] Payload template file saved to {0}.", FilePath));
         }
     }
 }
