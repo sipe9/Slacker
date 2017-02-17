@@ -4,11 +4,7 @@ Slacker is command line tool written in C# that sends formatted messages to Slac
 
 ## TODO
 1. Take P4 ticket property into use
-2. Expose all of the Slack incoming webhook message properties with arguments
-  1. Base message properties
-  2. Attachments
-    1. Attachment fields
-3. Add support to Slack incoming webhook actions
+2. Add support to Slack incoming webhook actions
 
 # How to use
 Slacker parses commanline arguments and executes desired operations. Arguments can be passed individially or with json configuration file. When both file and arguments are used, config file is first loaded and then individual arguments may override any configuration.
@@ -38,7 +34,7 @@ With 'p4validatecl' argument you can integrate pre-submit validation for changel
 4. Add new p4 trigger to **pre-submit**
    1. SlackerCmd.exe config=config.json p4validatecl=%changelist%
 
-## Direct message
+## Slack message
 Argument 'message' can be used to send messages directly. Remember to use quotation marks around message.
 
 **SlackerCmd.exe config=config.json message="Hello World!"**
@@ -46,6 +42,13 @@ Argument 'message' can be used to send messages directly. Remember to use quotat
 Or without configuration file.
 
 **SlackerCmd.exe name=yourslackname channel=general bottoken=yourslacktoken message="Hello World!"**
+
+## Slack message with attachments and fields
+Argument 'messagefile' can be used to send messages directly.
+
+**SlackerCmd.exe config=config.json messagefile=MessagePayload.json**
+
+Argument 'message' and 'channel' can be used with message file to override these properties.
 
 ## List of commanline arguments
 
@@ -72,6 +75,9 @@ Or without configuration file.
 
 **message="your slack message here"**
 *Slack message (message inside quotation marks)*
+
+**messagefile=messagePayload.json**
+*Slack rich formatted message with attachment and fields*
 
 **debugmessage**
 *Only prints message to console output and doesn't send it to Slack.*
@@ -139,6 +145,52 @@ Output is formatted json config file.
   }
 }
 ```
+
+## Slack message payload template
+Commandline argument 'payloadtemplate' can be used to generate slack message payload template file.
+
+**SlackerCmd.exe payloadtemplate=MessagePayload.json**
+
+```
+Output is formatted json file for slack message payloads.
+{
+  "text": "Main text",
+  "username": "Username",
+  "channel": null,
+  "icon_url": null,
+  "attachments": [
+    {
+      "fallback": null,
+      "title": "Title",
+      "title_link": null,
+      "pretext": "Pretext",
+      "author_name": "Author",
+      "author_icon": null,
+      "author_link": null,
+      "text": "Attachment text",
+      "color": "#7CD197",
+      "footer": "Footer",
+      "footer_icon": null,
+      "image_url": "",
+      "thumb_url": null,
+      "ts": null,
+      "fields": [
+        {
+          "title": "Field text",
+          "value": "High",
+          "short": true
+        },
+        {
+          "title": "Field text 2",
+          "value": "High",
+          "short": true
+        }		
+      ]
+    }
+  ]
+}
+```
+
 ## External libraries
 * Json.NET
 * p4api.net
